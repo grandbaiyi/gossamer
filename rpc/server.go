@@ -62,8 +62,6 @@ func (s *Server) RegisterService(receiver interface{}, name string) error {
 	return s.services.register(receiver, name)
 }
 
-
-
 // ServeHTTP handles http requests to the RPC server.
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	log.Println("Serving HTTP request...")
@@ -117,17 +115,6 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	} else {
 		codecReq.WriteError(w, statusCode, errResult)
 	}
-
-	// All APIs registered, start the HTTP listener
-	//var (
-	//	listener net.Listener
-	//	err      error
-	//)
-	//if listener, err = net.Listen("tcp", endpoint); err != nil {
-	//return nil, nil, err
-	//}
-	//fmt.Println("SERVER LISTENING")
-	//return listener, handler, err
 }
 
 // WriteError writes a status and message as the response to a request
@@ -136,32 +123,3 @@ func WriteError(w http.ResponseWriter, status int, msg string) {
 	w.WriteHeader(status)
 	fmt.Fprint(w, msg)
 }
-
-//cors := splitAndTrim(c.GlobalString(utils.RPCCORSDomainFlag.Name))
-//
-//// start http server
-//httpEndpoint := fmt.Sprintf("%s:%d", c.GlobalString(utils.RPCListenAddrFlag.Name), c.Int(rpcPortFlag.Name))
-//listener, _, err := rpc.StartHTTPEndpoint(httpEndpoint, rpcAPI, []string{"account"}, cors, vhosts, rpc.DefaultHTTPTimeouts)
-//if err != nil {
-//utils.Fatalf("Could not start RPC api: %v", err)
-//}
-//extapiURL = fmt.Sprintf("http://%s", httpEndpoint)
-//log.Info("HTTP endpoint opened", "url", extapiURL)
-//
-//defer func() {
-//	listener.Close()
-//	log.Info("HTTP endpoint closed", "url", httpEndpoint)
-//}()
-
-
-// All APIs registered, start the HTTP listener
-//var (
-//	listener net.Listener
-//	err      error
-//)
-//if listener, err = net.Listen("tcp", endpoint); err != nil {
-//return nil, nil, err
-//}
-//fmt.Println("SERVER LISTENING")
-//return listener, handler, err
-

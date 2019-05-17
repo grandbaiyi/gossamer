@@ -2,9 +2,9 @@ ARG GO_VERSION=1.12
 FROM golang:1.12-alpine3.9 as builder
 
 RUN apk --no-cache add git linux-headers ca-certificates
-COPY . /go/src/github.com/ChainSafe/gossamer
+COPY . /go/src/github.com/ChainSafe/gossamer/cmd/gossamer
 COPY config.toml /go/src/github.com/ChainSafe/gossamer
-WORKDIR /go/src/github.com/ChainSafe/gossamer/cmd
+WORKDIR /go/src/github.com/ChainSafe/gossamer/cmd/gossamer
 ENV GO111MODULE=on
 COPY go.mod .
 COPY go.sum .
@@ -18,5 +18,5 @@ FROM scratch
 WORKDIR /
 COPY --from=builder ./go/src/github.com/ChainSafe/gossamer/cmd/gossamer .
 COPY --from=builder ./go/src/github.com/ChainSafe/gossamer/config.toml .
-CMD ["./gossamer"]
+CMD ["gossamer --config config.toml"]
 EXPOSE 7001

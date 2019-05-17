@@ -34,7 +34,7 @@ var (
 		Usage: "Enable the HTTP-RPC server",
 	}
 	RPCListenAddrFlag = cli.StringFlag{
-		Name:  "rpscaddr",
+		Name:  "rpcaddr",
 		Usage: "HTTP-RPC server listening interface",
 		Value: cfg.DefaultHTTPHost,
 	}
@@ -46,7 +46,7 @@ var (
 	// P2P service settings
 	BootnodesFlag = cli.StringFlag{
 		Name:  "bootnodes",
-		Usage: "Comma separated enode URLs for P2P discovery bootstrap (set v4+v5 instead for light servers)",
+		Usage: "Comma separated enode URLs for P2P discovery bootstrap",
 		Value: "",
 	}
 )

@@ -18,6 +18,17 @@
 go get -u github.com/ChainSafeSystems/gossamer
 ```
 
+## Usage
+```
+make gossamer
+gossamer --config config.toml
+```
+
+#### Docker
+```
+make docker
+```
+
 ## Test
 ```
 go test -v ./...

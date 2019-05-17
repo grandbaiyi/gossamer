@@ -24,5 +24,5 @@ import (
 // Config is a collection of configurations throughout the system
 type Config struct {
 	ServiceConfig *p2p.ServiceConfig
-	BadgerDB      polkadb.BadgerDB
+	DbConfig      polkadb.DbConfig
 }

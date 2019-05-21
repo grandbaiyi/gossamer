@@ -20,6 +20,7 @@ import (
 	"github.com/ChainSafe/gossamer/p2p"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"github.com/ChainSafe/gossamer/cmd/utils"
 	cfg "github.com/ChainSafe/gossamer/config"
@@ -28,9 +29,20 @@ import (
 	log "github.com/inconshreveable/log15"
 	"github.com/naoina/toml"
 	"github.com/urfave/cli"
+	"unicode"
 )
 
 var (
+	dumpConfigCommand = cli.Command{
+		Action:      dumpConfig,
+		Name:        "dumpconfig",
+		Usage:       "Show configuration values",
+		ArgsUsage:   "",
+		Flags:       append(append(nodeFlags, rpcFlags...)),
+		Category:    "CONFIGURATION DEBUGGING",
+		Description: `The dumpconfig command shows configuration values.`,
+	}
+
 	configFileFlag = cli.StringFlag{
 		Name:  "config",
 		Usage: "TOML configuration file",
@@ -98,7 +110,7 @@ func loadConfig(file string) (*cfg.Config, error) {
 		}
 	}()
 	var config *cfg.Config
-	if err = toml.NewDecoder(f).Decode(&config); err != nil {
+	if err = tomlSettings.NewDecoder(f).Decode(&config); err != nil {
 		log.Error("decoding toml error", "err", err.Error())
 	}
 	return config, err
@@ -123,6 +135,7 @@ func setP2PConfig(ctx *cli.Context, cfg *p2p.ServiceConfig) *p2p.Service {
 	srv := startP2PService(cfg)
 	return srv
 }
+
 // startP2PService starts a p2p network layer from provided config
 func startP2PService(cfg *p2p.ServiceConfig) *p2p.Service {
 	srv, err := p2p.NewService(cfg)
@@ -130,4 +143,48 @@ func startP2PService(cfg *p2p.ServiceConfig) *p2p.Service {
 		log.Error("error starting p2p", "err", err.Error())
 	}
 	return srv
+}
+
+// dumpConfig is the dumpconfig command.
+func dumpConfig(ctx *cli.Context) error {
+	fig, err := setConfig(ctx)
+	if err != nil {
+		return err
+	}
+	comment := ""
+
+	out, err := tomlSettings.Marshal(&fig)
+	if err != nil {
+		return err
+	}
+
+	dump := os.Stdout
+	if ctx.NArg() > 0 {
+		dump, err = os.OpenFile(ctx.Args().Get(0), os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
+		if err != nil {
+			return err
+		}
+		defer dump.Close()
+	}
+	dump.WriteString(comment)
+	dump.Write(out)
+
+	return nil
+}
+
+// These settings ensure that TOML keys use the same names as Go struct fields.
+var tomlSettings = toml.Config{
+	NormFieldName: func(rt reflect.Type, key string) string {
+		return key
+	},
+	FieldToKey: func(rt reflect.Type, field string) string {
+		return field
+	},
+	MissingField: func(rt reflect.Type, field string) error {
+		link := ""
+		if unicode.IsUpper(rune(rt.Name()[0])) && rt.PkgPath() != "main" {
+			link = fmt.Sprintf(", see https://godoc.org/%s#%s for available fields", rt.PkgPath(), rt.Name())
+		}
+		return fmt.Errorf("field '%s' is not defined in %s%s", field, rt.String(), link)
+	},
 }
